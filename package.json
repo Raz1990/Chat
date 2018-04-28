@@ -1,0 +1,24 @@
+{
+  "name": "chat",
+  "version": "1.0.0",
+  "description": "a chat app for JSBootCamp",
+  "main": "index.js",
+  "dependencies": {
+    "package.json": "^2.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Raz1990/ChatV1.git"
+  },
+  "keywords": [],
+  "author": "Raz Harash",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Raz1990/ChatV1/issues"
+  },
+  "homepage": "https://github.com/Raz1990/ChatV1#readme"
+}
