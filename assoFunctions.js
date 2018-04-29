@@ -153,5 +153,7 @@ function showGroupsAndUsers() {
 }
 
 //exports
-module.exports.showUserToGroupMenu = showUserToGroupMenu;
-module.exports.checkUserInGroupTOREMOVE = checkUserInGroupTOREMOVE;
+module.exports = {
+    showUserToGroupMenu: showUserToGroupMenu,
+    checkUserInGroupTOREMOVE: checkUserInGroupTOREMOVE,
+};

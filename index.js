@@ -51,5 +51,7 @@ function dealWithOption(answer) {
 mainMenu();
 
 //exports
-module.exports.mainMenu = mainMenu;
-module.exports.dealWithOption = dealWithOption;
+module.exports = {
+    mainMenu: mainMenu,
+    dealWithOption: dealWithOption,
+};

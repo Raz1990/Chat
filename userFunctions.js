@@ -252,7 +252,9 @@ function getUser(userName){
 }
 
 //exports
-module.exports.showUserMenu = showUserMenu;
-module.exports.checkIfUserExists = checkIfUserExists;
-module.exports.getUser = getUser;
+module.exports = {
+    showUserMenu: showUserMenu,
+    checkIfUserExists: checkIfUserExists,
+    getUser: getUser
+};
 

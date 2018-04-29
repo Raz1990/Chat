@@ -187,9 +187,11 @@ function getGroupsSize(){
 //END GROUP
 
 //exports
-module.exports.showGroupMenu = showGroupMenu;
-module.exports.printGroups = printGroups;
-module.exports.checkUserInGroup = checkUserInGroup;
-module.exports.checkIfGroupExists = checkIfGroupExists;
-module.exports.getGroup = getGroup;
-module.exports.getGroupsSize = getGroupsSize;
+module.exports = {
+    showGroupMenu: showGroupMenu,
+    printGroups: printGroups,
+    checkUserInGroup: checkUserInGroup,
+    checkIfGroupExists: checkIfGroupExists,
+    getGroup: getGroup,
+    getGroupsSize: getGroupsSize,
+};
