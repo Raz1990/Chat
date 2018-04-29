@@ -203,12 +203,12 @@ function dealWithUserUpdate(answer){
     }
     //find the user in the array using the user_name provided
     helpers.chosenUser = Users.find(o => o.user_name === answer);
-    helpers.rl.question('\nOk, please enter new user name: ', updateUserName);
+    helpers.rl.question('\nOk, please enter new user password: ', updateUserPassword);
 }
 
 //answer = new user name
-function updateUserName(answer){
-    helpers.chosenUser.user_name = answer;
+function updateUserPassword(answer){
+    helpers.chosenUser.password = answer;
     helpers.rl.question('\nOk, please enter the new age: ', updateUserAge);
 }
 
