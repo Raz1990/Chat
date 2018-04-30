@@ -8,16 +8,15 @@ var user_Names = {};
 //array of users, will be filled with User objects
 var Users = [];
 
+var newUser;
+
 //helper variables
-const menuUsers = '\n1) Add new User\n2) Delete User\n3) Update User\n4) Show Users\n5) Return to main menu\n6) Exit';
+const menuUsers = '\n1) Add new User\n2) Delete User\n3) Update User\n4) Show Users\n5) Return to main menu';
 
 //imports
-const helpers = require('./Models/helpers');
-const indexFuncs = require('./index');
+const helpers = require('./helpers');
 const groupFuncs = require('./groupFunctions');
-const assoFuncs = require('./assoFunctions');
 
-/*
 //sanity check
 User.user_name = 'Raz';
 User.age = 27;
@@ -30,7 +29,7 @@ User.password = 'bbb';
 Users[1] = Object.assign({},User);
 
 user_Names = {'Raz': true, 'Boaz': true};
-*/
+
 
 //USERS AREA
 
@@ -64,11 +63,7 @@ function dealWithUserInput (answer){
             break;
         case 5:
             console.log('Ok, going back to main menu now\n');
-            indexFuncs.mainMenu();
-            break;
-        case 6:
-            //return to the main menu and input the exit option
-            indexFuncs.dealWithOption(4);
+            helpers.menuCallback();
             break;
         default:
             console.log('ah? normal numbers, please');
@@ -90,19 +85,30 @@ function dealWithUserActionUSER(action) {
 }
 
 function dealWithInputUSERNAME(answer) {
-    if (user_Names[answer]) {
+    var userName = answer.trim();
+    if (userName === ''){
+        console.error('No empty names! Again!');
+        helpers.rl.question('Enter new user name (must be unique!): ', dealWithInputUSERNAME);
+    }
+    else if (user_Names[userName]) {
         console.error('It appears this user name is already taken! Please choose another!');
         helpers.rl.question('Enter new user name (must be unique!): ', dealWithInputUSERNAME);
     }
     else {
-        User.user_name = answer;
-        user_Names[answer] = true;
+        newUser = Object.assign({},User);
+        newUser.user_name = userName;
+        user_Names[userName] = true;
         helpers.rl.question('\nEnter user password: ', dealWithInputUSERPASSWORD);
     }
 }
 
 function dealWithInputUSERPASSWORD(answer) {
-    User.password = answer;
+    if (answer === ''){
+        console.error('No empty passwords! Again!');
+        helpers.rl.question('Enter new user name (must be unique!): ', dealWithInputUSERPASSWORD);
+        return;
+    }
+    newUser.password = answer;
     helpers.rl.question('\nEnter user age: ', dealWithInputUSERAGE);
 }
 
@@ -114,7 +120,7 @@ function dealWithInputUSERAGE(answer) {
         if (answer < 1){
             throw 'now this isnt right... age is invalid!';
         }
-        User.age = parseInt(answer);
+        newUser.age = parseInt(answer);
     }
     catch (err) {
         helpers.rl.question('Now get it right, please! ', dealWithInputUSERAGE);
@@ -122,10 +128,10 @@ function dealWithInputUSERAGE(answer) {
         return;
     }
 
-    console.log('New ' , User , ' Added successfully\n');
-    Users.push(Object.assign({},User));
+    console.log('New ' , newUser , ' Added successfully\n');
+    Users.push(Object.assign({},newUser));
 
-    indexFuncs.mainMenu();
+    helpers.menuCallback();
 }
 
 //OPTION 2 OF USER MENU - DELETE A USER
@@ -155,12 +161,13 @@ function dealWithUserDELETE(answer) {
 
     //get the index of the user in the array
     var index = Users.indexOf(userToDelete);
+
     //remove the user in the correct index
     Users.splice(index, 1);
 
     console.log('Sad to see you go,' , userToDelete.user_name, '!');
     console.log('Going back to the main menu now...\n');
-    indexFuncs.mainMenu();
+    helpers.menuCallback();
 }
 
 //OPTION 3 OF USER MENU - SHOW USERS
@@ -179,7 +186,7 @@ function printUsers(){
 
 function showUsers() {
     printUsers();
-    indexFuncs.mainMenu();
+    helpers.menuCallback();
 }
 
 //OPTIONS 4 OF USERS MENU - UPDATE USER
@@ -237,7 +244,7 @@ function updateUserAge(answer){
     //update the user in the correct index
     Users.splice(index, 1, helpers.chosenUser);
 
-    indexFuncs.mainMenu();
+    helpers.menuCallback();
 }
 
 //END USERS
@@ -253,8 +260,8 @@ function getUser(userName){
 
 //exports
 module.exports = {
-    showUserMenu: showUserMenu,
-    checkIfUserExists: checkIfUserExists,
-    getUser: getUser
+    showUserMenu,
+    checkIfUserExists,
+    getUser
 };
 

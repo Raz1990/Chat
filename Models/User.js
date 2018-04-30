@@ -1,6 +1,5 @@
 //imports
 const helpers = require('./../Models/helpers');
-const usersFuncs = require('./Users');
 
 //object of User.
 //has the following: user_name, password, age

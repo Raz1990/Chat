@@ -2,7 +2,7 @@
 const menuStart = '\nWelcome to ChatRoullete 2.0! Here are your options:\n1) Users options\n2) Groups options\n3) Groups and their Users\n4) Exit';
 
 //imports
-const helpers = require('./Models/helpers');
+const helpers = require('./helpers');
 const userFuncs = require('./userFunctions');
 const groupFuncs = require('./groupFunctions');
 const assoFuncs = require('./assoFunctions');
@@ -10,6 +10,8 @@ const assoFuncs = require('./assoFunctions');
 //MAIN MENU AREA
 
 function mainMenu() {
+    //set the main menu as a callback function to be used throughout the program
+    helpers.menuCallback = mainMenu;
     console.log(menuStart);
 
     helpers.rl.question('Choose your destiny...: ', dealWithOption);
@@ -52,6 +54,6 @@ mainMenu();
 
 //exports
 module.exports = {
-    mainMenu: mainMenu,
-    dealWithOption: dealWithOption,
+    mainMenu,
+    dealWithOption,
 };

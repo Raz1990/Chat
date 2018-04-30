@@ -9,15 +9,12 @@ var group_Names = {};
 var Groups = [];
 
 //helper variables
-const menuGroups = '\n1) Add new Group\n2) Delete Group\n3) Show Groups\n4) Return to main menu\n5) Exit';
+const menuGroups = '\n1) Add new Group\n2) Delete Group\n3) Show Groups\n4) Return to main menu';
 
 //imports
-const helpers = require('./Models/helpers');
-const indexFuncs = require('./index');
-const userFuncs = require('./userFunctions');
-const assoFuncs = require('./assoFunctions');
+const helpers = require('./helpers');
 
-/*
+
 //sanity check
 Group.group_name = 'AAA';
 Group.list_of_users = [];
@@ -28,7 +25,7 @@ Group.list_of_users = [];
 Groups[1] = Object.assign({},Group);
 
 group_Names = {'AAA': true,'BBB':true};
-*/
+
 
 //GROUPS AREA
 
@@ -59,11 +56,7 @@ function dealWithGroupInput (answer){
             break;
         case 4:
             console.log('Ok, going back to main menu now\n');
-            indexFuncs.mainMenu();
-            break;
-        case 5:
-            //return to the main menu and input the exit option
-            indexFuncs.dealWithOption(4);
+            helpers.menuCallback();
             break;
         default:
             console.log('ah? numbers in range, please');
@@ -91,14 +84,14 @@ function dealWithInputGROUPNAME(answer) {
         helpers.rl.question('Enter new group name (must be unique!): ', dealWithInputGROUPNAME);
     }
     else {
-        Group.group_name = answer;
-        Group.list_of_users = [];
+        var newGroup = Object.assign({},Group);
+        newGroup.group_name = answer;
+        newGroup.list_of_users = [];
         group_Names[answer] = true;
 
         console.log('New group named' , answer , 'Added successfully\n');
-        Groups.push(Object.assign({},Group));
-        console.log(Group);
-        indexFuncs.mainMenu();
+        Groups.push(newGroup);
+        helpers.menuCallback();
     }
 }
 
@@ -113,20 +106,23 @@ function dealWithGroupDELETE(answer) {
     //if the group name is not in use, it must mean it's not in the db
     if (!group_Names[answer]) {
         console.error('Sorry, no such group found!');
-        indexFuncs.mainMenu();
+        helpers.menuCallback();
         return;
     }
     //erase the group name from the db to free its use for others.
     group_Names[answer] = false;
+
     //find the group in the array using the group_name provided
     var groupToDelete = Groups.find(o => o.group_name === answer);
+
     //get the index of the group in the array
     var index = Groups.indexOf(groupToDelete);
+
     //remove the group in the correct index
     Groups.splice(index, 1);
     console.log(groupToDelete.group_name, 'deleted!');
     console.log('Going back to the main menu now...\n');
-    indexFuncs.mainMenu();
+    helpers.menuCallback();
 }
 
 //OPTION 3 OF GROUPS MENU - SHOW GROUPS
@@ -158,7 +154,7 @@ function printGroups(withUsers){
 function showGroups() {
     //print without details about users
     printGroups(false);
-    indexFuncs.mainMenu();
+    helpers.menuCallback();
 }
 
 //helper functions
@@ -167,7 +163,22 @@ function checkUserInGroup(userToSearch){
         if (group.list_of_users.find(o => o.user_name === userToSearch.user_name)) {
             helpers.chosenGroup = group;
             helpers.chosenUser = userToSearch;
-            assoFuncs.checkUserInGroupTOREMOVE(helpers.chosenUser.user_name, true);
+
+            if (group.list_of_users.find(o => o.user_name === userToSearch.user_name)){
+                console.log('Okay, we will remove ' + userToSearch.user_name + ' from ' + group.group_name);
+
+                //get the index of the user in the group
+                var index = group.list_of_users.indexOf(userToSearch);
+                //remove the user in the correct index from the group
+                group.list_of_users.splice(index, 1);
+
+                console.log('Going back to the main menu now...\n');
+                helpers.menuCallback();
+            }
+            //otherwise, user is not in the group, and cannot be removed
+            else{
+                console.log(userToSearch.user_name, 'is not in', group.group_name,'!');
+            }
         }
     });
 }
@@ -188,10 +199,10 @@ function getGroupsSize(){
 
 //exports
 module.exports = {
-    showGroupMenu: showGroupMenu,
-    printGroups: printGroups,
-    checkUserInGroup: checkUserInGroup,
-    checkIfGroupExists: checkIfGroupExists,
-    getGroup: getGroup,
-    getGroupsSize: getGroupsSize,
+    showGroupMenu,
+    printGroups,
+    checkUserInGroup,
+    checkIfGroupExists,
+    getGroup,
+    getGroupsSize,
 };

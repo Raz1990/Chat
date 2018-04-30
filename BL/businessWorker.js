@@ -8,6 +8,8 @@ const usersFuncs = require('./../Models/Users');
 mainMenu();
 
 function mainMenu() {
+    //set the main menu as a callback function to be used throughout the program
+    helpers.menuCallback = mainMenu;
     console.log(helpers.menuStart);
 
     helpers.rl.question('Choose your destiny...: ', dealWithMainMenuOption);
