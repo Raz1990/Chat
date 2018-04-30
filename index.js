@@ -9,6 +9,9 @@ const assoFuncs = require('./assoFunctions');
 
 //MAIN MENU AREA
 
+//here it where it all starts...
+mainMenu();
+
 function mainMenu() {
     //set the main menu as a callback function to be used throughout the program
     helpers.menuCallback = mainMenu;
@@ -48,9 +51,6 @@ function dealWithOption(answer) {
 }
 
 //END MAIN MENU
-
-//here it where it all starts...
-mainMenu();
 
 //exports
 module.exports = {

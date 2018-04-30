@@ -14,7 +14,7 @@ const menuGroups = '\n1) Add new Group\n2) Delete Group\n3) Show Groups\n4) Retu
 //imports
 const helpers = require('./helpers');
 
-
+/*
 //sanity check
 Group.group_name = 'AAA';
 Group.list_of_users = [];
@@ -25,7 +25,7 @@ Group.list_of_users = [];
 Groups[1] = Object.assign({},Group);
 
 group_Names = {'AAA': true,'BBB':true};
-
+*/
 
 //GROUPS AREA
 
@@ -171,9 +171,6 @@ function checkUserInGroup(userToSearch){
                 var index = group.list_of_users.indexOf(userToSearch);
                 //remove the user in the correct index from the group
                 group.list_of_users.splice(index, 1);
-
-                console.log('Going back to the main menu now...\n');
-                helpers.menuCallback();
             }
             //otherwise, user is not in the group, and cannot be removed
             else{

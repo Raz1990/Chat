@@ -17,6 +17,7 @@ const menuUsers = '\n1) Add new User\n2) Delete User\n3) Update User\n4) Show Us
 const helpers = require('./helpers');
 const groupFuncs = require('./groupFunctions');
 
+/*
 //sanity check
 User.user_name = 'Raz';
 User.age = 27;
@@ -29,7 +30,7 @@ User.password = 'bbb';
 Users[1] = Object.assign({},User);
 
 user_Names = {'Raz': true, 'Boaz': true};
-
+*/
 
 //USERS AREA
 
@@ -146,7 +147,7 @@ function dealWithUserDELETE(answer) {
     //if the user name is not in use, it must mean it's not in the db
     if (!user_Names[answer]) {
         console.error('Sorry, no such user found!');
-        indexFuncs.mainMenu();
+        helpers.menuCallback();
         return;
     }
     //find the user in the array using the user_name provided
@@ -205,7 +206,7 @@ function dealWithUserUpdate(answer){
     //if the user name is not in use, it must mean it's not in the db
     if (!user_Names[answer]) {
         console.error('Sorry, no such user found!');
-        indexFuncs.mainMenu();
+        helpers.menuCallback();
         return;
     }
     //find the user in the array using the user_name provided
