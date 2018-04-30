@@ -12,7 +12,7 @@ var Users = [];
 const menuUsers = '\n1) Add new User\n2) Delete User\n3) Update User\n4) Show Users\n5) Return to main menu\n6) Exit';
 
 //imports
-const helpers = require('./helpers');
+const helpers = require('./Models/helpers');
 const indexFuncs = require('./index');
 const groupFuncs = require('./groupFunctions');
 const assoFuncs = require('./assoFunctions');

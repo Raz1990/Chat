@@ -12,7 +12,7 @@ var Groups = [];
 const menuGroups = '\n1) Add new Group\n2) Delete Group\n3) Show Groups\n4) Return to main menu\n5) Exit';
 
 //imports
-const helpers = require('./helpers');
+const helpers = require('./Models/helpers');
 const indexFuncs = require('./index');
 const userFuncs = require('./userFunctions');
 const assoFuncs = require('./assoFunctions');

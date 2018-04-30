@@ -2,7 +2,7 @@
 const menuAsso = '\n1) Add user to a group\n2) remove a user from a group\n3) Show groups and their users\n4) Return to main menu\n5) Exit';
 
 //imports
-const helpers = require('./helpers');
+const helpers = require('./Models/helpers');
 const indexFuncs = require('./index');
 const userFuncs = require('./userFunctions');
 const groupFuncs = require('./groupFunctions');

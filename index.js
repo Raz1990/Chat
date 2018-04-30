@@ -2,7 +2,7 @@
 const menuStart = '\nWelcome to ChatRoullete 2.0! Here are your options:\n1) Users options\n2) Groups options\n3) Groups and their Users\n4) Exit';
 
 //imports
-const helpers = require('./helpers');
+const helpers = require('./Models/helpers');
 const userFuncs = require('./userFunctions');
 const groupFuncs = require('./groupFunctions');
 const assoFuncs = require('./assoFunctions');
