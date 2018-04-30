@@ -1,5 +1,5 @@
 //helper variables
-var chosenGroup, chosenUser, option;
+var chosenGroup, chosenUser, option, menuCallback;
 
 const readline = require('readline');
 const rl = readline.createInterface({
@@ -8,8 +8,9 @@ const rl = readline.createInterface({
 });
 
 module.exports = {
-    rl: rl,
-    option: option,
-    chosenUser: chosenUser,
-    chosenGroup: chosenGroup
+    rl,
+    option,
+    chosenUser,
+    chosenGroup,
+    menuCallback
 };

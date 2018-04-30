@@ -1,16 +1,15 @@
 //helper variables
-const menuAsso = '\n1) Add user to a group\n2) remove a user from a group\n3) Show groups and their users\n4) Return to main menu\n5) Exit';
+const menuAsso = '\n1) Add user to a group\n2) remove a user from a group\n3) Show groups and their users\n4) Return to main menu';
 
 //imports
 const helpers = require('./helpers');
-const indexFuncs = require('./index');
 const userFuncs = require('./userFunctions');
 const groupFuncs = require('./groupFunctions');
 
 //GROUPS AND USERS TOGETHER
 
 function showUserToGroupMenu(){
-    helpers.question('\nIn the Association menu. Now what? ', dealWithAssoInput);
+    helpers.rl.question('\nIn the Association menu. Now what? ', dealWithAssoInput);
     console.log(menuAsso);
 }
 
@@ -20,7 +19,7 @@ function dealWithAssoInput (answer){
     }
     catch (e){
         console.error('Woah! Numbers only, man!');
-        helpers.question('Now get it right, please! ', dealWithAssoInput);
+        helpers.rl.question('Now get it right, please! ', dealWithAssoInput);
         return;
     }
 
@@ -36,15 +35,11 @@ function dealWithAssoInput (answer){
             break;
         case 4:
             console.log('Ok, going back to main menu now\n');
-            indexFuncs.mainMenu();
-            break;
-        case 5:
-            //return to the main menu and input the exit option
-            indexFuncs.dealWithOption(4);
+            helpers.menuCallback();
             break;
         default:
             console.log('ah? normal numbers, please');
-            helpers.question('Now get in range, please! ', dealWithAssoInput);
+            helpers.rl.question('Now get in range, please! ', dealWithAssoInput);
             break;
     }
 }
@@ -54,16 +49,16 @@ function dealWithAssoInput (answer){
 function dealWithUserActionASSO(action) {
     if (groupFuncs.getGroupsSize()) {
         console.error('There are no groups to do actions with....\n');
-        indexFuncs.mainMenu();
+        helpers.menuCallback();
         return;
     }
     if (action === 'ADD') {
         console.log('\nVery well, lets add a user to a group!');
-        helpers.question('\nEnter the group name first: ', dealWithASSOaddGROUPNAME);
+        helpers.rl.question('\nEnter the group name first: ', dealWithASSOaddGROUPNAME);
     }
     if (action === 'REMOVE') {
         console.log('\nVery well, lets remove a user from a group!');
-        helpers.question('\nEnter the group name first: ', dealWithASSOdeleteGROUPNAME);
+        helpers.rl.question('\nEnter the group name first: ', dealWithASSOdeleteGROUPNAME);
     }
 }
 
@@ -74,11 +69,11 @@ function dealWithASSOaddGROUPNAME(answer) {
     //if group does not exist
     if (!groupFuncs.getGroup(answer)) {
         console.error('It appears this group does not exist!');
-        indexFuncs.mainMenu();
+        helpers.menuCallback();
     }
     else {
         helpers.chosenGroup = groupFuncs.getGroup(answer);
-        helpers.question('Ok, enter the user name you want to add to '+ answer +': ', checkUserInGroupTOADD);
+        helpers.rl.question('Ok, enter the user name you want to add to '+ answer +': ', checkUserInGroupTOADD);
     }
 }
 
@@ -87,12 +82,12 @@ function checkUserInGroupTOADD(answer) {
     //if the user name is not in use, it must mean it's not in the db
     if (!userFuncs.checkIfUserExists(answer)) {
         console.log('No user with that user name found. Returning to main menu');
-        indexFuncs.mainMenu();
+        helpers.menuCallback();
         return;
     }
     //if the user is already in the group
     if (helpers.chosenGroup.list_of_users.find(o => o.user_name === answer)){
-        helpers.question('Try again!', checkUserInGroupTOADD);
+        helpers.rl.question('Try again!', checkUserInGroupTOADD);
         console.log('\nThis user is already in the group! What kind of sick game youre playing here?!\n');
         return;
     }
@@ -101,7 +96,7 @@ function checkUserInGroupTOADD(answer) {
         helpers.chosenUser = userFuncs.getUser(answer);
         helpers.chosenGroup.list_of_users.push(helpers.chosenUser);
         console.log(helpers.chosenUser.user_name, 'was added to', helpers.chosenGroup.group_name + '\n');
-        indexFuncs.mainMenu();
+        helpers.menuCallback();
     }
 }
 
@@ -110,24 +105,24 @@ function dealWithASSOdeleteGROUPNAME(answer) {
     //if group does not exist
     if (!groupFuncs.checkIfGroupExists(answer)) {
         console.error('It appears this group does not exist!');
-        indexFuncs.mainMenu();
+        helpers.menuCallback();
     }
     else {
         helpers.chosenGroup = groupFuncs.getGroup(answer);
-        helpers.question('Ok, enter the user name you want remove from '+ answer +':', checkUserInGroupTOREMOVE);
+        helpers.rl.question('Ok, enter the user name you want remove from '+ answer +': ', checkUserInGroupTOREMOVE);
     }
 }
 
 //answer = user name
-function checkUserInGroupTOREMOVE(answer, check) {
+function checkUserInGroupTOREMOVE(answer) {
     //if the user name is not in use, it must mean it's not in the db
     if (!userFuncs.getUser(answer)) {
         console.error('No user with that user name found.');
-        indexFuncs.mainMenu();
+        helpers.menuCallback();
         return;
     }
     //if the user is in the group
-    if (check || helpers.chosenGroup.list_of_users.find(o => o.user_name === answer)){
+    if (helpers.chosenGroup.list_of_users.find(o => o.user_name === answer)){
         console.log('Okay, we will remove ' + answer + ' from ' + helpers.chosenGroup.group_name);
 
         //get the index of the user in the group
@@ -136,7 +131,7 @@ function checkUserInGroupTOREMOVE(answer, check) {
         helpers.chosenGroup.list_of_users.splice(index, 1);
 
         console.log('Going back to the main menu now...\n');
-        indexFuncs.mainMenu();
+        helpers.menuCallback();
     }
     //otherwise, user is not in the group, and cannot be removed
     else{
@@ -149,11 +144,10 @@ function checkUserInGroupTOREMOVE(answer, check) {
 function showGroupsAndUsers() {
     //print with details about users
     groupFuncs.printGroups(true);
-    indexFuncs.mainMenu();
+    helpers.menuCallback();
 }
 
 //exports
 module.exports = {
-    showUserToGroupMenu: showUserToGroupMenu,
-    checkUserInGroupTOREMOVE: checkUserInGroupTOREMOVE,
+    showUserToGroupMenu,
 };
