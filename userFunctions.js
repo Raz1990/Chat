@@ -17,7 +17,7 @@ const menuUsers = '\n1) Add new User\n2) Delete User\n3) Update User\n4) Show Us
 const helpers = require('./helpers');
 const groupFuncs = require('./groupFunctions');
 
-/*
+
 //sanity check
 User.user_name = 'Raz';
 User.age = 27;
@@ -30,7 +30,7 @@ User.password = 'bbb';
 Users[1] = Object.assign({},User);
 
 user_Names = {'Raz': true, 'Boaz': true};
-*/
+
 
 //USERS AREA
 

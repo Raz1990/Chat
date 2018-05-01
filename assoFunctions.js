@@ -47,7 +47,7 @@ function dealWithAssoInput (answer){
 //ADD/REMOVE USER TO/FROM A GROUP
 
 function dealWithUserActionASSO(action) {
-    if (groupFuncs.getGroupsSize()) {
+    if (groupFuncs.getGroupsSize() === 0) {
         console.error('There are no groups to do actions with....\n');
         helpers.menuCallback();
         return;
@@ -66,13 +66,19 @@ function dealWithUserActionASSO(action) {
 
 //answer = group name
 function dealWithASSOaddGROUPNAME(answer) {
+    helpers.chosenGroup = groupFuncs.getGroupByName(answer);
     //if group does not exist
-    if (!groupFuncs.getGroup(answer)) {
+    if (!helpers.chosenGroup) {
         console.error('It appears this group does not exist!');
+        helpers.menuCallback();
+        return;
+    }
+    //if there are groups inside the group
+    if (groupFuncs.getGroupsListInGroup(answer).length > 0) {
+        console.error('this group is a holder of groups, and cannot add users to it');
         helpers.menuCallback();
     }
     else {
-        helpers.chosenGroup = groupFuncs.getGroup(answer);
         helpers.rl.question('Ok, enter the user name you want to add to '+ answer +': ', checkUserInGroupTOADD);
     }
 }
@@ -87,14 +93,13 @@ function checkUserInGroupTOADD(answer) {
     }
     //if the user is already in the group
     if (helpers.chosenGroup.list_of_users.find(o => o.user_name === answer)){
-        helpers.rl.question('Try again!', checkUserInGroupTOADD);
         console.log('\nThis user is already in the group! What kind of sick game youre playing here?!\n');
-        return;
+        helpers.rl.question('Try again!', checkUserInGroupTOADD);
     }
     //otherwise, it's ok to add the user to the group
     else{
         helpers.chosenUser = userFuncs.getUser(answer);
-        helpers.chosenGroup.list_of_users.push(helpers.chosenUser);
+        groupFuncs.addItemToGroup(helpers.chosenGroup,helpers.chosenUser);
         console.log(helpers.chosenUser.user_name, 'was added to', helpers.chosenGroup.group_name + '\n');
         helpers.menuCallback();
     }
@@ -108,7 +113,7 @@ function dealWithASSOdeleteGROUPNAME(answer) {
         helpers.menuCallback();
     }
     else {
-        helpers.chosenGroup = groupFuncs.getGroup(answer);
+        helpers.chosenGroup = groupFuncs.getGroupByName(answer);
         helpers.rl.question('Ok, enter the user name you want remove from '+ answer +': ', checkUserInGroupTOREMOVE);
     }
 }
