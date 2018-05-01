@@ -155,7 +155,7 @@ function dealWithUserDELETE(answer) {
 
     //first, check if the user is in a group(s)
     //if any are found, they will be removed
-    groupFuncs.checkUserInGroup(userToDelete);
+    groupFuncs.deleteUserInGroups(userToDelete);
 
     //erase the user name from the db to free its use for others.
     user_Names[answer] = false;

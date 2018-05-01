@@ -21,19 +21,6 @@ var newGroupName, foundGroup;
 //imports
 const helpers = require('./helpers');
 
-/*
-//sanity check
-Group.group_name = 'AAA';
-Group.list_of_users = [];
-Groups[0] = Object.assign({},Group);
-
-Group.group_name = 'BBB';
-Group.list_of_users = [];
-Groups[1] = Object.assign({},Group);
-
-group_Names = {'AAA': true,'BBB':true};
-*/
-
 //GROUPS AREA
 
 function showGroupMenu() {
@@ -95,7 +82,7 @@ function dealWithUserActionGROUP(action) {
 function dealWithInputGROUPNAME(answer) {
 
     //if the name is taken
-    if (group_Names[answer]) {
+    if (checkIfGroupExists(answer)) {
         console.error('It appears this group name is already taken! Please choose another!');
         helpers.rl.question('Enter new group name (must be unique!): ', dealWithInputGROUPNAME);
         return;
@@ -111,7 +98,7 @@ function dealWithInputGROUPNAME(answer) {
     //if there is at least one group, ask where to put the new group.
     //ALONGSIDE an existing one in the beginning, or INSIDE one (to act as sub group).
     else{
-        helpers.rl.question('\nWould you want to add the group as a sub-group? y/n', dealWithGroupLocation);
+        helpers.rl.question('\nWould you want to add the group as a sub-group? y/n ', dealWithGroupLocation);
     }
 }
 
@@ -138,7 +125,7 @@ function dealWithSubGroup(answer) {
     if (foundGroup) {
         //if it has users, deal with them first
         if (foundGroup.list_of_users.length > 0){
-            helpers.rl.question('this group has some members in it! Please provide a new group name to move them to:', movingUsersToNewGroup);
+            helpers.rl.question('this group has some members in it! Please provide a new group name to move them to: ', movingUsersToNewGroup);
         }
         //otherwise, add the group as normal
         else {
@@ -172,6 +159,9 @@ function movingUsersToNewGroup(answer) {
     //point to the user array of the former group
     newGroup.list_of_users = foundGroup.list_of_users.slice(0);
 
+    //change the counter of users within the new group
+    newGroup.count = newGroup.list_of_users.length;
+
     //"reset" former group's users array
     foundGroup.list_of_users = [];
 
@@ -198,9 +188,10 @@ function addGroupToGroup(hostingGroup, groupName, groupToAdd) {
 
 //OPTION 2 OF GROUP MENU - DELETE A GROUP
 
+//answer = group name
 function dealWithGroupDELETE(answer) {
     //if the group name is not in use, it must mean it's not in the db
-    if (!group_Names[answer]) {
+    if (!checkIfGroupExists(answer)) {
         console.error('Sorry, no such group found!');
         helpers.menuCallback();
         return;
@@ -208,14 +199,32 @@ function dealWithGroupDELETE(answer) {
     //erase the group name from the db to free its use for others.
     group_Names[answer] = false;
 
-    //find the group in the array using the group_name provided
-    var groupToDelete = Groups.find(o => o.group_name === answer);
+    var groupToDelete = getGroupByName(answer);
+
+    var groupToDeleteParent = groupToDelete.parent_group;
+
+    //case 1: it has users and can flatten
+    if (groupToDelete.list_of_users.length > 0 && groupToDeleteParent.list_of_groups.length === 1) {
+        console.log('please note: the users within this group were moved to this group: ' + groupToDeleteParent.group_name);
+        groupToDeleteParent.list_of_users = groupToDelete.list_of_users.slice(0);
+    }
+
+    //case 2: it has no users OR it has users but it isn't possilbe to flatten it due to other subgroups
+    else if (groupToDelete.list_of_users.length === 0 || groupToDeleteParent.list_of_groups.length > 1) {
+        if (groupToDeleteParent.list_of_groups.length > 1) {
+            console.log('please note: the users within this group could not be moved to a different group');
+
+            lowerCountInGroups(groupToDeleteParent);
+
+        }
+    }
 
     //get the index of the group in the array
-    var index = Groups.indexOf(groupToDelete);
+    var index = groupToDeleteParent.list_of_groups.indexOf(groupToDelete);
 
     //remove the group in the correct index
-    Groups.splice(index, 1);
+    groupToDeleteParent.list_of_groups.splice(index, 1);
+
     console.log(groupToDelete.group_name, 'deleted!');
     console.log('Going back to the main menu now...\n');
     helpers.menuCallback();
@@ -225,6 +234,9 @@ function dealWithGroupDELETE(answer) {
 
 function printGroups(withUsers, group, separator){
 
+    //if no group provided, start with beginning.
+    group = group || beginning;
+
     if (group === beginning && beginning.list_of_groups.length === 0){
         console.log('there are no groups');
         return;
@@ -232,29 +244,27 @@ function printGroups(withUsers, group, separator){
 
     withUsers = withUsers || false;
 
-    separator ? separator+='--' : separator = '--';
-
-    //if no group provided, start with beginning.
-    group = group || beginning;
+    separator ? separator+='-' : separator = '-';
 
     group.list_of_groups.forEach(function (subGroup) {
-        console.log(separator + subGroup.group_name + '(' + subGroup.count + ')');
+        console.log(separator , subGroup.group_name , '(' + subGroup.count + ')');
 
         if (subGroup.list_of_groups.length > 0) {
             printGroups(withUsers, subGroup, separator);
         }
 
         if (withUsers && subGroup.list_of_groups.length === 0) {
-            separator+='--';
+            separator+='-';
             if (subGroup.list_of_users.length===0) {
-                console.log(separator + 'which is empty');
+                console.log(separator , 'which is empty');
             }
             else {
-                console.log(separator + 'with the members:');
+                console.log(separator , 'with the members:');
                 subGroup.list_of_users.forEach(function (user) {
-                    console.log(separator + user.user_name, 'with the age of', user.age);
+                    console.log(separator , user);
                 });
             }
+            separator = separator.slice(0, separator.length - 1);;
         }//if users
     });
 }
@@ -266,26 +276,44 @@ function showGroups() {
 }
 
 //helper functions
-function checkUserInGroup(userToSearch){
-    Groups.forEach(function (group) {
-        if (group.list_of_users.find(o => o.user_name === userToSearch.user_name)) {
-            helpers.chosenGroup = group;
+function deleteUserInGroups(userToSearch, group) {
+
+    //if group is not provided, default to beginning
+    group = group || beginning;
+
+    group.list_of_groups.forEach(function (subGroup) {
+        //if a group has groups within it
+        if (group.list_of_groups.length > 0) {
+            deleteUserInGroups(userToSearch, subGroup);
+        }
+        if (subGroup.list_of_users.find(o => o.user_name === userToSearch.user_name)) {
+            helpers.chosenGroup = subGroup;
             helpers.chosenUser = userToSearch;
 
-            if (group.list_of_users.find(o => o.user_name === userToSearch.user_name)){
-                console.log('Okay, we will remove ' + userToSearch.user_name + ' from ' + group.group_name);
+            console.log('Okay, we will remove ' + userToSearch.user_name + ' from ' + subGroup.group_name);
 
-                //get the index of the user in the group
-                var index = group.list_of_users.indexOf(userToSearch);
-                //remove the user in the correct index from the group
-                group.list_of_users.splice(index, 1);
-            }
-            //otherwise, user is not in the group, and cannot be removed
-            else{
-                console.log(userToSearch.user_name, 'is not in', group.group_name,'!');
-            }
+            lowerCountInGroups(subGroup,1);
+
+            //get the index of the user in the group
+            var index = subGroup.list_of_users.indexOf(userToSearch);
+
+            //remove the user in the correct index from the group
+            subGroup.list_of_users.splice(index, 1);
+        }
+        //otherwise, user is not in the group, and cannot be removed
+        else {
+            console.log(userToSearch.user_name, 'is not in', subGroup.group_name, '!');
         }
     });
+}
+
+//helper functions
+function lowerCountInGroups(group, amountToRemove) {
+    amountToRemove = amountToRemove || group.list_of_users.length;
+    while (group) {
+        group.count -= amountToRemove;
+        group = getParentGroup(group);
+    }
 }
 
 function checkIfGroupExists(groupName){
@@ -373,7 +401,7 @@ function getParentGroup(childGroup){
 module.exports = {
     showGroupMenu,
     printGroups,
-    checkUserInGroup,
+    deleteUserInGroups,
     getGroupByName,
     checkIfGroupExists,
     getGroupsSize,
