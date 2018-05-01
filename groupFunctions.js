@@ -69,6 +69,13 @@ function dealWithUserActionGROUP(action) {
     if (action === 'ADD') {
         console.log('\nVery well, lets add a new group!');
         helpers.rl.question('\nEnter group name (must be unique!): ', dealWithInputGROUPNAME);
+        return;
+    }
+    //if there are no groups...
+    if (Groups.length === 0){
+        console.info('\nThere appears to be no groups... Nothing to delete!\n');
+        helpers.menuCallback();
+        return;
     }
     if (action === 'REMOVE') {
         helpers.rl.question('K. Whats the group name? ', dealWithGroupDELETE);
@@ -98,11 +105,6 @@ function dealWithInputGROUPNAME(answer) {
 //OPTION 2 OF GROUP MENU - DELETE A GROUP
 
 function dealWithGroupDELETE(answer) {
-    //if there are no groups...
-    if (Groups.length === 0){
-        console.info('\nThere appears to be no such group... Nothing to delete!\n');
-        return;
-    }
     //if the group name is not in use, it must mean it's not in the db
     if (!group_Names[answer]) {
         console.error('Sorry, no such group found!');
