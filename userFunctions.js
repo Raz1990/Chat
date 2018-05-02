@@ -11,7 +11,7 @@ var Users = [];
 var newUser;
 
 //helper variables
-const menuUsers = '\n1) Add new User\n2) Delete User\n3) Update User\n4) Show Users\n5) Return to main menu';
+const menuUsers = '\n1) Add new User\n2) Delete User\n3) Update User\n4) Show Users\n5) Get User\'s groups\n6) Return to main menu';
 
 //imports
 const helpers = require('./helpers');
@@ -19,17 +19,17 @@ const groupFuncs = require('./groupFunctions');
 
 
 //sanity check
-User.user_name = 'Raz';
+User.user_name = 'raz';
 User.age = 27;
 User.password = 'rrr';
 Users[0] = Object.assign({},User);
 
-User.user_name = 'Boaz';
+User.user_name = 'bbb';
 User.age = 40;
 User.password = 'bbb';
 Users[1] = Object.assign({},User);
 
-user_Names = {'Raz': true, 'Boaz': true};
+user_Names = {'raz': true, 'bbb': true};
 
 
 //USERS AREA
@@ -63,6 +63,9 @@ function dealWithUserInput (answer){
             showUsers();
             break;
         case 5:
+            helpers.rl.question('\nOk, please enter the user name ', showUsersGroups);
+            break;
+        case 6:
             console.log('Ok, going back to main menu now\n');
             helpers.menuCallback();
             break;
@@ -247,6 +250,25 @@ function updateUserAge(answer){
 
     helpers.menuCallback();
 }
+
+//OPTION 5 OF USERS MENU - GET GROUPS A USER IS IN
+
+//answer = user name
+function showUsersGroups(answer) {
+    var array = getUsersGroups(answer);
+    console.log(answer + ' is found in the following groups: ');
+    array.forEach(function (group) {
+        console.log(group.group_name);
+    });
+    helpers.menuCallback();
+}
+
+function getUsersGroups(userName) {
+    var user = getUser(userName);
+    var array = groupFuncs.getGroupsListForUsers(user);
+    return array;
+}
+
 
 //END USERS
 

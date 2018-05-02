@@ -47,7 +47,7 @@ function dealWithAssoInput (answer){
 //ADD/REMOVE USER TO/FROM A GROUP
 
 function dealWithUserActionASSO(action) {
-    if (groupFuncs.getGroupsSize() === 0) {
+    if (groupFuncs.getGroupsListInGroup().length === 0) {
         console.error('There are no groups to do actions with....\n');
         helpers.menuCallback();
         return;
