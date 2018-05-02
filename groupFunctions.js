@@ -11,10 +11,10 @@ beginning.group_name = 'beginning';
 beginning.parent_group = null;
 beginning.list_of_groups = [];
 
-
 //helper variables
 const menuGroups = '\n1) Add new Group\n2) Delete Group\n3) Show Groups\n4) Search Group\n5) Return to main menu';
 var newGroupName, foundGroup, groupToDelete, groupToDeleteParent;
+
 //imports
 const helpers = require('./helpers');
 
@@ -81,13 +81,6 @@ function dealWithUserActionGROUP(action) {
 //answer = group name
 function dealWithInputGROUPNAME(answer) {
 
-    //if the name is taken
-    if (checkIfGroupExists(answer)) {
-        console.error('It appears this group name is already taken! Please choose another!');
-        helpers.rl.question('Enter new group name (must be unique!): ', dealWithInputGROUPNAME);
-        return;
-    }
-
     newGroupName = answer;
 
     //if its the very first group, it will be added to beginning regardless
@@ -109,7 +102,7 @@ function dealWithGroupLocation(answer) {
         //print the options
         console.log('Please choose between these groups');
         printGroups();
-        helpers.rl.question('enter group name to add the new group to: ', dealWithSubGroup);
+        helpers.rl.question('enter the group name to add the new group to: ', dealWithSubGroup);
     }
     //otherwise, add it as a primary group in the beginning
     else {
@@ -120,9 +113,18 @@ function dealWithGroupLocation(answer) {
 
 //answer = sub - group name
 function dealWithSubGroup(answer) {
+    //find a group from a list of already created groups
     foundGroup = getGroupByName(answer);
+
     //if found something!
     if (foundGroup) {
+        //first check if the name of the new group is already taken inside that group parent
+        if (checkIfGroupExists(newGroupName)) {
+            helpers.rl.question('Enter new group name (must be unique!): ', dealWithInputGROUPNAME);
+            console.error('It appears this group name is already taken! Please choose another!');
+            return;
+        }
+        //otherwise, continue as normal
         //if it has users, deal with them first
         if (foundGroup.list_of_users.length > 0){
             helpers.rl.question('this group has some members in it! Please provide a new group name to move them to: ', movingUsersToNewGroup);
@@ -142,7 +144,7 @@ function dealWithSubGroup(answer) {
 //answer = new group name
 function movingUsersToNewGroup(answer) {
     //create new group to house the users
-    var newGroup = createNewGroup(answer);
+    var newGroup = createNewGroup(answer, foundGroup);
 
     //point to the user array of the former group
     newGroup.list_of_users = foundGroup.list_of_users.slice(0);
@@ -164,11 +166,11 @@ function movingUsersToNewGroup(answer) {
 
 function addGroupToGroup(hostingGroup, groupName, groupToAdd) {
 
-    groupToAdd = groupToAdd || createNewGroup(groupName);
-
+    groupToAdd = groupToAdd || createNewGroup(groupName, hostingGroup);
+    /*
     //point to the parent
     groupToAdd.parent_group = hostingGroup;
-
+    */
     hostingGroup.list_of_groups.push(groupToAdd);
 
     console.log('New group named' , groupName , 'Added successfully\n');
@@ -184,12 +186,14 @@ function dealWithGroupDELETE(answer) {
         helpers.menuCallback();
         return;
     }
-    //erase the group name from the db to free its use for others.
-    group_Names[answer] = false;
 
     groupToDelete = getGroupByName(answer);
 
-    groupToDeleteParent = groupToDelete.parent_group;
+    groupToDeleteParent = getParentGroup(groupToDelete);
+
+    //erase the group name from the db to free its use for others.
+    group_Names[groupToDeleteParent.group_name+'-'+answer] = false;
+
 
     //case 1: it has users and can flatten. Ask the user if wishes to do so
     if (groupToDelete.list_of_users.length > 0 && groupToDeleteParent.list_of_groups.length === 1) {
@@ -253,7 +257,7 @@ function printGroups(withUsers, group, separator){
 
     withUsers = withUsers || false;
 
-    separator ? separator+='-' : separator = '';
+    separator ? separator+='-' : separator = '-';
 
     group.list_of_groups.forEach(function (subGroup) {
         console.log(separator , subGroup.group_name , '(' + subGroup.count + ')');
@@ -294,6 +298,7 @@ function printGroupPath(groupName) {
     helpers.menuCallback();
 }
 
+//searches for a specific group and returns the full path to it
 function searchGroup(groupName, pathStr) {
 
     pathStr = pathStr || '';
@@ -314,28 +319,34 @@ function searchGroup(groupName, pathStr) {
 }
 
 //helper functions
-function createNewGroup(name) {
+//creates a new group with a given group name. parentGroup is optional.
+function createNewGroup(groupName, parentGroup) {
     var newGroup = Object.assign({},Group);
-    newGroup.group_name = name;
+    newGroup.group_name = groupName;
     newGroup.list_of_groups = [];
     newGroup.list_of_users = [];
     newGroup.count = 0;
-    newGroup.parent_group = null;
-    group_Names[name] = true;
+    if (parentGroup) {
+        newGroup.parent_group = parentGroup;
+    }
+    else {
+        newGroup.parent_group = null;
+    }
+    group_Names[parentGroup.group_name+'-'+groupName] = true;
 
     return newGroup;
 }
 
 function getGroupByName(groupName,group){
-    var foundGroup;
-
-    if (group === beginning && beginning.list_of_groups.length === 0){
-        console.log('there are no groups');
-        return null;
-    }
-
     //if no group provided, start with beginning.
     group = group || beginning;
+
+    if (beginning.list_of_groups.length === 0 && group === beginning){
+        //console.log('there are no groups');
+        return beginning;
+    }
+
+    var foundGroup;
 
     if (group.list_of_groups.length > 0) {
         foundGroup = group.list_of_groups.find(o => o.group_name === groupName);
@@ -400,7 +411,17 @@ function lowerCountInGroups(group, amountToRemove) {
 }
 
 function checkIfGroupExists(groupName){
-    return group_Names[groupName];
+    var tempGroup = getGroupByName(groupName);
+    //if nothing is found
+    if (!tempGroup) {
+        return false;
+    }
+    //if its the very beginning
+    if (tempGroup === beginning) {
+        return group_Names[beginning.group_name+'-'+groupName];
+    }
+    var parentGroup = tempGroup.parent_group;
+    return group_Names[parentGroup.group_name+'-'+groupName];
 }
 
 //returns the sub-groups a group has.

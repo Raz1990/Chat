@@ -8,10 +8,9 @@ var user_Names = {};
 //array of users, will be filled with User objects
 var Users = [];
 
-var newUser;
-
 //helper variables
 const menuUsers = '\n1) Add new User\n2) Delete User\n3) Update User\n4) Show Users\n5) Get User\'s groups\n6) Return to main menu';
+var newUser;
 
 //imports
 const helpers = require('./helpers');
