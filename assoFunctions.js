@@ -92,7 +92,7 @@ function checkUserInGroupTOADD(answer) {
         return;
     }
     //if the user is already in the group
-    if (helpers.chosenGroup.list_of_users.find(o => o.user_name === answer)){
+    if (helpers.chosenGroup.list_of_users.find(o => o.getUserName() === answer)){
         console.log('\nThis user is already in the group! What kind of sick game youre playing here?!\n');
         helpers.rl.question('Try again!', checkUserInGroupTOADD);
     }
@@ -100,7 +100,7 @@ function checkUserInGroupTOADD(answer) {
     else{
         helpers.chosenUser = userFuncs.getUser(answer);
         groupFuncs.addItemToGroup(helpers.chosenGroup,helpers.chosenUser);
-        console.log(helpers.chosenUser.user_name, 'was added to', helpers.chosenGroup.group_name + '\n');
+        console.log(helpers.chosenUser.getUserName(), 'was added to', helpers.chosenGroup.getGroupName() + '\n');
         helpers.menuCallback();
     }
 }
@@ -127,8 +127,8 @@ function checkUserInGroupTOREMOVE(answer) {
         return;
     }
     //if the user is in the group
-    if (helpers.chosenGroup.list_of_users.find(o => o.user_name === answer)){
-        console.log('Okay, we will remove ' + answer + ' from ' + helpers.chosenGroup.group_name);
+    if (helpers.chosenGroup.list_of_users.find(o => o.getUserName() === answer)){
+        console.log('Okay, we will remove ' + answer + ' from ' + helpers.chosenGroup.getGroupName());
 
         //get the index of the user in the group
         var index = helpers.chosenGroup.list_of_users.indexOf(helpers.chosenUser);
@@ -140,7 +140,7 @@ function checkUserInGroupTOREMOVE(answer) {
     }
     //otherwise, user is not in the group, and cannot be removed
     else{
-        console.log(helpers.chosenUser.user_name, 'is not in', helpers.chosenGroup.group_name,'!');
+        console.log(helpers.chosenUser.getUserName(), 'is not in', helpers.chosenGroup.getGroupName(),'!');
     }
 }
 

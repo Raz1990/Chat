@@ -1,6 +1,6 @@
 //object of User.
 //has the following: user_name, password, age
-var User = {};
+var User = {getUserName: getUserName};
 
 //will hold user names to check for uniqueness
 var user_Names = {};
@@ -280,10 +280,15 @@ function getUser(userName){
     return Users.find(o => o.user_name === userName);
 }
 
+function getUserName(){
+    return this.user_name;
+}
+
 //exports
 module.exports = {
     showUserMenu,
     checkIfUserExists,
-    getUser
+    getUser,
+    getUserName
 };
 

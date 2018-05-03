@@ -378,14 +378,14 @@ function deleteUserInGroups(userToSearch, group) {
 
     group.list_of_groups.forEach(function (subGroup) {
         //if a group has groups within it
-        if (group.list_of_groups.length > 0) {
+        if (subGroup.list_of_groups.length > 0) {
             deleteUserInGroups(userToSearch, subGroup);
         }
-        if (subGroup.list_of_users.find(o => o.user_name === userToSearch.user_name)) {
+        else if (subGroup.list_of_users.find(o => o.getUserName() === userToSearch.getUserName())) {
             helpers.chosenGroup = subGroup;
             helpers.chosenUser = userToSearch;
 
-            console.log('Okay, we will remove ' + userToSearch.user_name + ' from ' + subGroup.group_name);
+            console.log('Okay, we will remove ' + userToSearch.getUserName() + ' from ' + subGroup.group_name);
 
             lowerCountInGroups(subGroup,1);
 
@@ -397,7 +397,7 @@ function deleteUserInGroups(userToSearch, group) {
         }
         //otherwise, user is not in the group, and cannot be removed
         else {
-            console.log(userToSearch.user_name, 'is not in', subGroup.group_name, '!');
+            console.log(userToSearch.getUserName(), 'is not in', subGroup.group_name, '!');
         }
     });
 }
@@ -459,7 +459,7 @@ function getGroupsListForUsers(user, group, groupsArrayHoldingUsers) {
             getGroupsListForUsers(user, subGroup, groupsArrayHoldingUsers);
         }
 
-        if (subGroup.list_of_users.find(o => o.user_name === user.user_name)) {
+        if (subGroup.list_of_users.find(o => o.getUserName() === user.getUserName())) {
             groupsArrayHoldingUsers.push(subGroup);
         }
     });
@@ -485,6 +485,10 @@ function getParentGroup(childGroup){
     return parent;
 }
 
+function getGroupName(){
+    return this.group_name;
+}
+
 //END GROUP
 
 //exports
@@ -497,4 +501,5 @@ module.exports = {
     getGroupsListInGroup,
     getGroupsListForUsers,
     addItemToGroup,
+    getGroupName,
 };
