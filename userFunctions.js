@@ -1,6 +1,9 @@
 //object of User.
 //has the following: user_name, password, age
-var User = {getUserName: getUserName};
+var User = {
+    getUserName: getUserName,
+    returnUserInfo: returnUserInfo
+};
 
 //will hold user names to check for uniqueness
 var user_Names = {};
@@ -15,7 +18,6 @@ var newUser;
 //imports
 const helpers = require('./helpers');
 const groupFuncs = require('./groupFunctions');
-
 
 //sanity check
 User.user_name = 'raz';
@@ -185,6 +187,10 @@ function printUsers(){
             console.log(user);
         });
     }
+}
+
+function returnUserInfo() {
+    return this.user_name + ') ' + this.age + ' with the password ' +this.password;
 }
 
 function showUsers() {

@@ -1,6 +1,6 @@
 //object of Group.
 //has the following: group_name, parent_group, count, list_of_users OR list_of_groups (but not both!)
-var Group = {};
+var Group = {getGroupName: getGroupName};
 
 //will hold group names to check for uniqueness
 var group_Names = {'beginning' : true};
@@ -274,10 +274,10 @@ function printGroups(withUsers, group, separator){
             else {
                 console.log(separator , 'with the members:');
                 subGroup.list_of_users.forEach(function (user) {
-                    console.log(separator , user);
+                    console.log(separator , user.returnUserInfo());
                 });
             }
-            separator = separator.slice(0, separator.length - 1);;
+            separator = separator.slice(0, separator.length - 1);
         }//if users
     });
 }
