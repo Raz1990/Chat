@@ -12,7 +12,6 @@ beginning.parent_group = null;
 beginning.list_of_groups = [];
 
 //helper variables
-const menuGroups = '\n1) Add new Group\n2) Delete Group\n3) Show Groups\n4) Search Group\n5) Return to main menu';
 var newGroupName, foundGroup, groupToDelete, groupToDeleteParent;
 
 //imports
@@ -20,63 +19,23 @@ const helpers = require('./helpers');
 
 //GROUPS AREA
 
-function showGroupMenu() {
-    helpers.rl.question('\nIn the Groups menu. Now what? ', dealWithGroupInput);
-    console.log(menuGroups);
+//OPTION 1 OF GROUP MENU - ADDING A NEW GROUP
+
+function addNewGroup() {
+    console.log('\nVery well, lets add a new group!');
+    helpers.rl.question('\nEnter group name (must be unique!): ', dealWithInputGROUPNAME);
+    return;
 }
 
-function dealWithGroupInput (answer){
-    try {
-        helpers.option = parseInt(answer);
-    }
-    catch (e){
-        console.error('Woah! Numbers only, man!');
-        helpers.rl.question('Now get it right, please! ', dealWithGroupInput);
-        return;
-    }
-
-    switch (helpers.option){
-        case 1:
-            dealWithUserActionGROUP('ADD');
-            break;
-        case 2:
-            dealWithUserActionGROUP('REMOVE');
-            break;
-        case 3:
-            showGroups();
-            break;
-        case 4:
-            helpers.rl.question('Please enter group name to search: ', printGroupPath);
-            break;
-        case 5:
-            console.log('Ok, going back to main menu now\n');
-            helpers.menuCallback();
-            break;
-        default:
-            console.log('ah? numbers in range, please');
-            helpers.rl.question('Now get in range, please! ', dealWithGroupInput);
-            break;
-    }
-}
-
-function dealWithUserActionGROUP(action) {
-    if (action === 'ADD') {
-        console.log('\nVery well, lets add a new group!');
-        helpers.rl.question('\nEnter group name (must be unique!): ', dealWithInputGROUPNAME);
-        return;
-    }
+function deleteAGroup() {
     //if there are no groups...
-    if (beginning.list_of_groups.length === 0){
+    if (beginning.list_of_groups.length === 0) {
         console.info('\nThere appears to be no groups... Nothing to delete!\n');
         helpers.menuCallback();
         return;
     }
-    if (action === 'REMOVE') {
-        helpers.rl.question('K. Whats the group name? ', dealWithGroupDELETE);
-    }
+    helpers.rl.question('K. Whats the group name? ', dealWithGroupDELETE);
 }
-
-//OPTION 1 OF GROUP MENU - ADDING A NEW GROUP
 
 //answer = group name
 function dealWithInputGROUPNAME(answer) {
@@ -274,7 +233,7 @@ function printGroups(withUsers, group, separator){
             else {
                 console.log(separator , 'with the members:');
                 subGroup.list_of_users.forEach(function (user) {
-                    console.log(separator , user.returnUserInfo());
+                    console.log(separator, user.getUserInfo());
                 });
             }
             separator = separator.slice(0, separator.length - 1);
@@ -317,6 +276,25 @@ function searchGroup(groupName, pathStr) {
 
     return pathStr;
 }
+
+//OPTION 5 OF USERS MENU - GET GROUPS A USER IS IN
+//answer = user name
+function showUsersGroups(userToSearch) {
+
+    var array = getGroupsListForUsers(userToSearch);
+
+    if (array.length > 0) {
+        console.log(userToSearch.getUserName() + ' is found in the following groups: ');
+        array.forEach(function (group) {
+            console.log(group.group_name);
+        });
+    }
+    else {
+        console.log(userToSearch.getUserName() + ' is not found in any groups');
+    }
+    helpers.menuCallback();
+}
+
 
 //helper functions
 //creates a new group with a given group name. parentGroup is optional.
@@ -371,6 +349,18 @@ function getGroupByName(groupName,group){
     return foundGroup;
 }
 
+function deleteUserInSingleGroup(userToSearch, group) {
+    //console.log('Okay, we will remove ' + userToSearch.getUserName() + ' from ' + subGroup.group_name);
+
+    lowerCountInGroups(group, 1);
+
+    //get the index of the user in the group
+    var index = group.list_of_users.indexOf(userToSearch);
+
+    //remove the user in the correct index from the group
+    group.list_of_users.splice(index, 1);
+}
+
 function deleteUserInGroups(userToSearch, group) {
 
     //if group is not provided, default to beginning
@@ -385,15 +375,8 @@ function deleteUserInGroups(userToSearch, group) {
             helpers.chosenGroup = subGroup;
             helpers.chosenUser = userToSearch;
 
-            console.log('Okay, we will remove ' + userToSearch.getUserName() + ' from ' + subGroup.group_name);
+            deleteUserInSingleGroup(subGroup, userToSearch);
 
-            lowerCountInGroups(subGroup,1);
-
-            //get the index of the user in the group
-            var index = subGroup.list_of_users.indexOf(userToSearch);
-
-            //remove the user in the correct index from the group
-            subGroup.list_of_users.splice(index, 1);
         }
         //otherwise, user is not in the group, and cannot be removed
         else {
@@ -493,13 +476,18 @@ function getGroupName(){
 
 //exports
 module.exports = {
-    showGroupMenu,
     printGroups,
+    deleteUserInSingleGroup,
     deleteUserInGroups,
     getGroupByName,
     checkIfGroupExists,
     getGroupsListInGroup,
+    showUsersGroups,
     getGroupsListForUsers,
     addItemToGroup,
     getGroupName,
+    showGroups,
+    printGroupPath,
+    addNewGroup,
+    deleteAGroup,
 };

@@ -1,48 +1,9 @@
-//helper variables
-const menuAsso = '\n1) Add user to a group\n2) remove a user from a group\n3) Show groups and their users\n4) Return to main menu';
-
 //imports
 const helpers = require('./helpers');
 const userFuncs = require('./userFunctions');
 const groupFuncs = require('./groupFunctions');
 
 //GROUPS AND USERS TOGETHER
-
-function showUserToGroupMenu(){
-    helpers.rl.question('\nIn the Association menu. Now what? ', dealWithAssoInput);
-    console.log(menuAsso);
-}
-
-function dealWithAssoInput (answer){
-    try {
-        helpers.option = parseInt(answer);
-    }
-    catch (e){
-        console.error('Woah! Numbers only, man!');
-        helpers.rl.question('Now get it right, please! ', dealWithAssoInput);
-        return;
-    }
-
-    switch (helpers.option){
-        case 1:
-            dealWithUserActionASSO('ADD');
-            break;
-        case 2:
-            dealWithUserActionASSO('REMOVE');
-            break;
-        case 3:
-            showGroupsAndUsers();
-            break;
-        case 4:
-            console.log('Ok, going back to main menu now\n');
-            helpers.menuCallback();
-            break;
-        default:
-            console.log('ah? normal numbers, please');
-            helpers.rl.question('Now get in range, please! ', dealWithAssoInput);
-            break;
-    }
-}
 
 //ADD/REMOVE USER TO/FROM A GROUP
 
@@ -79,7 +40,7 @@ function dealWithASSOaddGROUPNAME(answer) {
         helpers.menuCallback();
     }
     else {
-        helpers.rl.question('Ok, enter the user name you want to add to '+ answer +': ', checkUserInGroupTOADD);
+        helpers.rl.question('Ok, enter the user name you want to add to ' + answer + ': ', checkUserInGroupTOADD);
     }
 }
 
@@ -92,14 +53,14 @@ function checkUserInGroupTOADD(answer) {
         return;
     }
     //if the user is already in the group
-    if (helpers.chosenGroup.list_of_users.find(o => o.getUserName() === answer)){
+    if (helpers.chosenGroup.list_of_users.find(o => o.getUserName() === answer)) {
         console.log('\nThis user is already in the group! What kind of sick game youre playing here?!\n');
         helpers.rl.question('Try again!', checkUserInGroupTOADD);
     }
     //otherwise, it's ok to add the user to the group
-    else{
+    else {
         helpers.chosenUser = userFuncs.getUser(answer);
-        groupFuncs.addItemToGroup(helpers.chosenGroup,helpers.chosenUser);
+        groupFuncs.addItemToGroup(helpers.chosenGroup, helpers.chosenUser);
         console.log(helpers.chosenUser.getUserName(), 'was added to', helpers.chosenGroup.getGroupName() + '\n');
         helpers.menuCallback();
     }
@@ -114,7 +75,13 @@ function dealWithASSOdeleteGROUPNAME(answer) {
     }
     else {
         helpers.chosenGroup = groupFuncs.getGroupByName(answer);
-        helpers.rl.question('Ok, enter the user name you want remove from '+ answer +': ', checkUserInGroupTOREMOVE);
+        if (helpers.chosenGroup.list_of_users.length > 0) {
+            helpers.rl.question('Ok, enter the user name you want remove from ' + answer + ': ', checkUserInGroupTOREMOVE);
+        }
+        else {
+            console.info('This group has no users in it...');
+            helpers.menuCallback();
+        }
     }
 }
 
@@ -126,22 +93,19 @@ function checkUserInGroupTOREMOVE(answer) {
         helpers.menuCallback();
         return;
     }
+
+    var user = helpers.chosenGroup.list_of_users.find(o => o.getUserName() === answer);
+
     //if the user is in the group
-    if (helpers.chosenGroup.list_of_users.find(o => o.getUserName() === answer)){
-        console.log('Okay, we will remove ' + answer + ' from ' + helpers.chosenGroup.getGroupName());
-
-        //get the index of the user in the group
-        var index = helpers.chosenGroup.list_of_users.indexOf(helpers.chosenUser);
-        //remove the user in the correct index from the group
-        helpers.chosenGroup.list_of_users.splice(index, 1);
-
-        console.log('Going back to the main menu now...\n');
-        helpers.menuCallback();
+    if (user) {
+        //console.log('Okay, we will remove ' + answer + ' from ' + helpers.chosenGroup.getGroupName());
+        groupFuncs.deleteUserInSingleGroup(helpers.chosenGroup, user);
     }
     //otherwise, user is not in the group, and cannot be removed
-    else{
-        console.log(helpers.chosenUser.getUserName(), 'is not in', helpers.chosenGroup.getGroupName(),'!');
+    else {
+        console.log(answer, 'is not in', helpers.chosenGroup.getGroupName(), '!');
     }
+    helpers.menuCallback();
 }
 
 //OPTION 3 OF ASSOCIATION MENU - PRINT GROUPS AND THEIR USERS
@@ -154,5 +118,7 @@ function showGroupsAndUsers() {
 
 //exports
 module.exports = {
-    showUserToGroupMenu,
+    dealWithUserActionASSO,
+    showGroupsAndUsers,
+
 };
