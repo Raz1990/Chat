@@ -10,6 +10,7 @@ const beginning = Object.assign({},Group);
 beginning.group_name = 'beginning';
 beginning.parent_group = null;
 beginning.list_of_groups = [];
+beginning.list_of_users = [];
 
 //helper variables
 var newGroupName, foundGroup, groupToDelete, groupToDeleteParent;
@@ -78,7 +79,7 @@ function dealWithSubGroup(answer) {
     //if found something!
     if (foundGroup) {
         //first check if the name of the new group is already taken inside that group parent
-        if (checkIfGroupExists(newGroupName)) {
+        if (checkIfGroupExists(newGroupName,foundGroup)) {
             helpers.rl.question('Enter new group name (must be unique!): ', dealWithInputGROUPNAME);
             console.error('It appears this group name is already taken! Please choose another!');
             return;
@@ -393,8 +394,8 @@ function lowerCountInGroups(group, amountToRemove) {
     }
 }
 
-function checkIfGroupExists(groupName){
-    var tempGroup = getGroupByName(groupName);
+function checkIfGroupExists(groupName, start){
+    var tempGroup = getGroupByName(groupName, start);
     //if nothing is found
     if (!tempGroup) {
         return false;
@@ -462,9 +463,6 @@ function addItemToGroup(group, item){
 
 function getParentGroup(childGroup){
     var parent = childGroup.parent_group;
-    if (parent.group_name === 'beginning') {
-        return null;
-    }
     return parent;
 }
 
