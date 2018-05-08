@@ -27,20 +27,23 @@ function dealWithUserActionASSO(action) {
 
 //answer = group name
 function dealWithASSOaddGROUPNAME(answer) {
-    helpers.chosenGroup = groupFuncs.getGroupByName(answer);
+    groupFuncs.getGroupByName(answer,continueAddUserToGroup);
+}
+
+function continueAddUserToGroup(foundGroup) {
     //if group does not exist
-    if (!helpers.chosenGroup) {
+    if (!foundGroup) {
         console.error('It appears this group does not exist!');
         helpers.menuCallback();
         return;
     }
     //if there are groups inside the group
-    if (groupFuncs.getGroupsListInGroup(answer).length > 0) {
+    if (groupFuncs.getGroupsListInGroup(foundGroup).length > 0) {
         console.error('this group is a holder of groups, and cannot add users to it');
         helpers.menuCallback();
     }
     else {
-        helpers.rl.question('Ok, enter the user name you want to add to ' + answer + ': ', checkUserInGroupTOADD);
+        helpers.rl.question('Ok, enter the user name you want to add to ' + foundGroup.group_name + ': ', checkUserInGroupTOADD);
     }
 }
 
@@ -112,8 +115,8 @@ function checkUserInGroupTOREMOVE(answer) {
 
 function showGroupsAndUsers() {
     //print with details about users
-    groupFuncs.printGroups(true);
-    helpers.menuCallback();
+    groupFuncs.showGroups(true);
+    //helpers.menuCallback();
 }
 
 //exports
