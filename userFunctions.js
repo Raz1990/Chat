@@ -275,7 +275,6 @@ module.exports = {
     updateUser,
     showUsers,
     checkIfUserExists,
-    checkIfUsersExist,
     showUsersGroups,
     getUser,
     getUserName,

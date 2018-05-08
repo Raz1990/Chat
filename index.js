@@ -15,9 +15,17 @@ const assoFuncs = require('./assoFunctions');
 //here it where it all starts...
 mainMenu();
 
+//set the main menu as a callback function to be used throughout the program
+helpers.menuCallback = mainMenu;
+
+function init() {
+    helpers.chosenGroup = null;
+    helpers.chosenUser = null;
+}
+
 function mainMenu() {
-    //set the main menu as a callback function to be used throughout the program
-    helpers.menuCallback = mainMenu;
+    //reset global variables for another round
+    init();
     console.log(menuStart);
 
     helpers.rl.question('Choose your destiny...: ', dealWithOption);
@@ -165,7 +173,7 @@ function dealWithGroupInput(answer) {
             groupFuncs.showGroups();
             break;
         case 4:
-            helpers.rl.question('Please enter group name to search: ', groupFuncs.printGroupPath);
+            helpers.rl.question('Please enter group name to search: ', groupFuncs.showGroupPath);
             break;
         case 5:
             console.log('Ok, going back to main menu now\n');

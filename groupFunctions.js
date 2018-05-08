@@ -2,9 +2,6 @@
 //has the following: group_name, parent_group, count, list_of_users OR list_of_groups (but not both!)
 var Group = {getGroupName: getGroupName};
 
-//will hold group names to check for uniqueness
-var group_Names = {'beginning' : true};
-
 //a "beginning" which will hold all of the groups within it. a "root" of sorts
 const beginning = Object.assign({},Group);
 beginning.group_name = 'beginning';
@@ -13,7 +10,7 @@ beginning.list_of_groups = [];
 beginning.list_of_users = [];
 
 //helper variables
-var newGroupName, foundGroup, groupToDelete, groupToDeleteParent;
+var newGroupName, foundGroup, groupToDelete, groupToDeleteParent, groupsArray;
 
 //imports
 const helpers = require('./helpers');
@@ -66,7 +63,12 @@ function dealWithGroupLocation(answer) {
     }
     //otherwise, add it as a primary group in the beginning
     else {
-        addGroupToGroup(beginning,newGroupName);
+        if (checkIfGroupExists(newGroupName)) {
+            console.error('It appears this group name is already taken!');
+        }
+        else {
+            addGroupToGroup(beginning, newGroupName);
+        }
         helpers.menuCallback();
     }
 }
@@ -74,14 +76,19 @@ function dealWithGroupLocation(answer) {
 //answer = sub - group name
 function dealWithSubGroup(answer) {
     //find a group from a list of already created groups
-    foundGroup = getGroupByName(answer);
+    //console.log('Among these groups with the name ' + answer +', which is the correct path?');
+    getGroupByName(answer, continueSubGroup);
+}
 
+function continueSubGroup(findings) {
+    foundGroup = findings;
     //if found something!
     if (foundGroup) {
         //first check if the name of the new group is already taken inside that group parent
         if (checkIfGroupExists(newGroupName,foundGroup)) {
-            helpers.rl.question('Enter new group name (must be unique!): ', dealWithInputGROUPNAME);
-            console.error('It appears this group name is already taken! Please choose another!');
+            console.error('It appears this group name is already taken!');
+            helpers.menuCallback();
+            //helpers.rl.question('Enter new group name (must be unique!): ', dealWithInputGROUPNAME);
             return;
         }
         //otherwise, continue as normal
@@ -96,8 +103,9 @@ function dealWithSubGroup(answer) {
         }
     }
     else {
-        console.log('no such group found. try again\n');
-        dealWithGroupLocation('y');
+        //console.log('no such group found. try again\n');
+        //dealWithGroupLocation('y');
+        helpers.menuCallback();
     }
 }
 
@@ -133,27 +141,28 @@ function addGroupToGroup(hostingGroup, groupName, groupToAdd) {
     */
     hostingGroup.list_of_groups.push(groupToAdd);
 
-    console.log('New group named' , groupName , 'Added successfully\n');
+    console.log('New group named' , groupName , 'added successfully\n');
 }
 
 //OPTION 2 OF GROUP MENU - DELETE A GROUP
 
+//FIX
 //answer = group name
 function dealWithGroupDELETE(answer) {
-    //if the group name is not in use, it must mean it's not in the db
-    if (!checkIfGroupExists(answer)) {
+    getGroupByName(answer,continueDelete);
+}
+
+function continueDelete(findings) {
+
+    groupToDelete = findings;
+
+    if (!groupToDelete)  {
         console.error('Sorry, no such group found!');
         helpers.menuCallback();
         return;
     }
 
-    groupToDelete = getGroupByName(answer);
-
     groupToDeleteParent = getParentGroup(groupToDelete);
-
-    //erase the group name from the db to free its use for others.
-    group_Names[groupToDeleteParent.group_name+'-'+answer] = false;
-
 
     //case 1: it has users and can flatten. Ask the user if wishes to do so
     if (groupToDelete.list_of_users.length > 0 && groupToDeleteParent.list_of_groups.length === 1) {
@@ -179,7 +188,7 @@ function continueDeleteGroupProcess() {
     if (groupToDelete.list_of_users.length === 0 || groupToDeleteParent.list_of_groups.length > 1) {
         if (groupToDeleteParent.list_of_groups.length > 1) {
             console.log('please note: the users within this group were not moved to a different group');
-            lowerCountInGroups(groupToDeleteParent);
+            lowerCountInGroups(groupToDelete);
         }
     }
 
@@ -205,6 +214,7 @@ function deleteGroup(deletedGroup, holderGroup) {
 
 //OPTION 3 OF GROUPS MENU - SHOW GROUPS
 
+//print all the groups in the tree
 function printGroups(withUsers, group, separator){
 
     //if no group provided, start with beginning.
@@ -242,41 +252,50 @@ function printGroups(withUsers, group, separator){
     });
 }
 
-function showGroups() {
+function showGroups(withUsers) {
     //print without details about users
-    printGroups(false);
+    printGroups(withUsers);
     helpers.menuCallback();
 }
 
 //OPTION 4 OF GROUPS MENU - SEARCH FOR GROUP
-function printGroupPath(groupName) {
 
-    var path = searchGroup(groupName,'');
+//searches for a group and returns full paths to it
+function searchGroup(groupName) {
 
-    console.log(path);
+    var pathStrForGroups = [];
+    var pathStr;
+    var groups = getAllGroupsByName(groupName);
 
+    groups.forEach(function (subGroup) {
+        pathStr = subGroup.group_name;
+        var parent = getParentGroup(subGroup);
+        //as long as there is a parent
+        while (parent && parent !== beginning) {
+            pathStr = parent.group_name + ' -> ' + pathStr;
+            parent = getParentGroup(parent);
+        }
+        pathStrForGroups.push(pathStr);
+    });
+
+    return pathStrForGroups;
+}
+
+function showGroupPath(groupName){
+    printGroupPath(groupName);
     helpers.menuCallback();
 }
 
-//searches for a specific group and returns the full path to it
-function searchGroup(groupName, pathStr) {
+function printGroupPath(groupName) {
 
-    pathStr = pathStr || '';
+    var paths = searchGroup(groupName);
 
-    var group = getGroupByName(groupName);
-
-    //if there is a parent that is not the beginning root
-    if (group.parent_group !== beginning) {
-        pathStr += searchGroup(group.parent_group.group_name,pathStr);
-        pathStr += ' -> ' + group.group_name;
-    }
-    //else we have reached the beginning
-    else {
-        return group.group_name;
+    for (var i=0; i< paths.length;i++){
+        console.log((i+1)+') '+paths[i]);
     }
 
-    return pathStr;
 }
+
 
 //OPTION 5 OF USERS MENU - GET GROUPS A USER IS IN
 //answer = user name
@@ -311,12 +330,53 @@ function createNewGroup(groupName, parentGroup) {
     else {
         newGroup.parent_group = null;
     }
-    group_Names[parentGroup.group_name+'-'+groupName] = true;
 
     return newGroup;
 }
 
-function getGroupByName(groupName,group){
+//supply a name, and get back every single group in the tree with that name
+function getAllGroupsByName(groupName,group,foundGroups) {
+    foundGroups = foundGroups || [];
+
+    group = group || beginning;
+
+    var foundGroup;
+    if (group.list_of_groups.length > 0) {
+        foundGroup = group.list_of_groups.find(o => o.group_name === groupName);
+    }
+    if (foundGroup) {
+        foundGroups.push(foundGroup);
+    }
+
+    group.list_of_groups.forEach(function (subGroup) {
+        if (subGroup.list_of_groups.length > 0) {
+            getAllGroupsByName(groupName,subGroup,foundGroups);
+        }
+    });
+
+    return foundGroups;
+}
+
+function getGroupByName(groupName, callback){
+    //get all groups with the corresponding name, put in the global variable
+    groupsArray = getAllGroupsByName(groupName);
+
+    if (groupsArray.length === 0) {
+        console.log('no such groups found');
+        callback();
+        return;
+    }
+
+    //show the user the available options
+    printGroupPath(groupName);
+
+    helpers.rl.question('Where is the group located? ', function (choice) {
+        helpers.chosenGroup = groupsArray[choice-1];
+        callback(helpers.chosenGroup);
+    });
+}
+
+function getFirstGroupByName(groupName,group) {
     //if no group provided, start with beginning.
     group = group || beginning;
 
@@ -338,9 +398,9 @@ function getGroupByName(groupName,group){
             for (var i = 0; i< group.list_of_groups.length;i++) {
                 var subGroup = group.list_of_groups[i];
                 if (subGroup.list_of_groups.length > 0) {
-                    foundGroup = getGroupByName(groupName, subGroup);
-                    if (foundGroup) {
-                        return foundGroup;
+                    getGroupByName(groupName, subGroup);
+                    if (helpers.chosenGroup) {
+                        return helpers.chosenGroup;
                     }
                 }
             }
@@ -376,7 +436,7 @@ function deleteUserInGroups(userToSearch, group) {
             helpers.chosenGroup = subGroup;
             helpers.chosenUser = userToSearch;
 
-            deleteUserInSingleGroup(subGroup, userToSearch);
+            deleteUserInSingleGroup(userToSearch,subGroup);
 
         }
         //otherwise, user is not in the group, and cannot be removed
@@ -388,34 +448,30 @@ function deleteUserInGroups(userToSearch, group) {
 
 function lowerCountInGroups(group, amountToRemove) {
     amountToRemove = amountToRemove || group.list_of_users.length;
-    while (group) {
+    while (group && group !== beginning) {
         group.count -= amountToRemove;
         group = getParentGroup(group);
     }
 }
 
-function checkIfGroupExists(groupName, start){
-    var tempGroup = getGroupByName(groupName, start);
-    //if nothing is found
-    if (!tempGroup) {
+function checkIfGroupExists(groupName, holderGroup){
+
+    holderGroup = holderGroup || beginning;
+
+    var found = holderGroup.list_of_groups.find(o => o.getGroupName() === groupName);
+    if (found) {
+        return true;
+    }
+    else {
         return false;
     }
-    //if its the very beginning
-    if (tempGroup === beginning) {
-        return group_Names[beginning.group_name+'-'+groupName];
-    }
-    var parentGroup = tempGroup.parent_group;
-    return group_Names[parentGroup.group_name+'-'+groupName];
 }
 
 //returns the sub-groups a group has.
-function getGroupsListInGroup(groupName){
-    if (groupName) {
-        return getGroupByName(groupName).list_of_groups;
-    }
-    else {
-        return beginning.list_of_groups;
-    }
+function getGroupsListInGroup(group){
+    group = group || beginning;
+
+    return group.list_of_groups;
 }
 
 /* currently not used, perhaps in the future
@@ -474,9 +530,9 @@ function getGroupName(){
 
 //exports
 module.exports = {
-    printGroups,
     deleteUserInSingleGroup,
     deleteUserInGroups,
+    getAllGroupsByName,
     getGroupByName,
     checkIfGroupExists,
     getGroupsListInGroup,
@@ -485,7 +541,7 @@ module.exports = {
     addItemToGroup,
     getGroupName,
     showGroups,
-    printGroupPath,
+    showGroupPath,
     addNewGroup,
     deleteAGroup,
 };
