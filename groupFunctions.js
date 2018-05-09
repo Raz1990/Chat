@@ -163,7 +163,7 @@ function continueDelete(findings) {
 
     groupToDeleteParent = getParentGroup(groupToDelete);
 
-    //case 1: it has users and can flatten. Ask the user if wishes to do so
+    //it has users and can flatten. Ask the user if wishes to do so
     if (groupToDelete.list_of_users.length > 0 && groupToDeleteParent.list_of_groups.length === 1) {
         //ask if user wants to flatten or simply delete the group and it's users
         helpers.rl.question('This group holds users! Would you like to move them up a level? y/n ', dealWithFlatten);
@@ -183,12 +183,10 @@ function dealWithFlatten(answer) {
     else {
         continueDeleteGroupProcess(true);
     }
-
 }
 
 function continueDeleteGroupProcess(losingUsers) {
-    //case 2: it has no users OR it has users but it isn't possible to flatten it due to other subgroups or simply not wanting to
-    if (losingUsers) {
+    if (losingUsers && groupToDelete.list_of_users.length > 0) {
         console.log('please note: the users within this group were not moved to a different group');
         lowerCountInGroups(groupToDelete);
     }
