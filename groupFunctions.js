@@ -146,7 +146,6 @@ function addGroupToGroup(hostingGroup, groupName, groupToAdd) {
 
 //OPTION 2 OF GROUP MENU - DELETE A GROUP
 
-//FIX
 //answer = group name
 function dealWithGroupDELETE(answer) {
     getGroupByName(answer,continueDelete);
@@ -170,26 +169,28 @@ function continueDelete(findings) {
         helpers.rl.question('This group holds users! Would you like to move them up a level? y/n ', dealWithFlatten);
     }
     else {
-        continueDeleteGroupProcess();
+        continueDeleteGroupProcess(true);
     }
 }
 
 //answer = y or n
 function dealWithFlatten(answer) {
     if (answer.toLowerCase() === 'y') {
-        console.log('The users within this group were moved to this group: ' + groupToDeleteParent.group_name);
         groupToDeleteParent.list_of_users = groupToDelete.list_of_users.slice(0);
+        console.log('The users within this group were moved to this group: ' + groupToDeleteParent.group_name);
+        continueDeleteGroupProcess(false);
     }
-    continueDeleteGroupProcess();
+    else {
+        continueDeleteGroupProcess(true);
+    }
+
 }
 
-function continueDeleteGroupProcess() {
+function continueDeleteGroupProcess(losingUsers) {
     //case 2: it has no users OR it has users but it isn't possible to flatten it due to other subgroups or simply not wanting to
-    if (groupToDelete.list_of_users.length === 0 || groupToDeleteParent.list_of_groups.length > 1) {
-        if (groupToDeleteParent.list_of_groups.length > 1) {
-            console.log('please note: the users within this group were not moved to a different group');
-            lowerCountInGroups(groupToDelete);
-        }
+    if (losingUsers) {
+        console.log('please note: the users within this group were not moved to a different group');
+        lowerCountInGroups(groupToDelete);
     }
 
     deleteGroup(groupToDelete, groupToDeleteParent);
